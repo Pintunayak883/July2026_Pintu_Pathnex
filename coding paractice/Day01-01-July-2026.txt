@@ -10,9 +10,9 @@ Rewrite this YAML manually:
   become: yes
 
   tasks:
-    - name: Install Nginx
+    - name: Install nginx
       yum:
-        name: Nginx
+        name: nginx
         state: present
 
 
