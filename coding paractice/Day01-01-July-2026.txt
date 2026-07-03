@@ -36,7 +36,7 @@ resource "aws_instance" "PathnexEC2" {
 apiVersion: v1
 kind: Pod
 metadata:
-   name: pathnex-Pod
+   name: pathnex-pod
 spec:
   containers:
     - name: web
