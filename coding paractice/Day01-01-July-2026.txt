@@ -47,8 +47,8 @@ spec:
 ## Shell Script - Print Date & Hostname
 
 #!/bin/bash
-echo "Date: ${date}"
-echo "Hostname: ${hostname}"
+echo "Date: $(date)"
+echo "Hostname: $(hostname)"
 
 # Git Integration
 ## Jenkins Pipeline - Checkout Git
