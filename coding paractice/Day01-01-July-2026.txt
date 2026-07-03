@@ -26,7 +26,7 @@ resource "aws_instance" "PathnexEC2" {
     ami          = "ami-0abcd1234abcd1234"
     instance_type = "c5.xlarge"
 
-    tages = {
+    tags = {
         Name = "Pathnex-EC2"
     }
 }
