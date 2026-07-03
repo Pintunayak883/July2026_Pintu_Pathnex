@@ -5,7 +5,7 @@
 Rewrite this YAML manually:
 
 ---
-- name: INstall Nginx on Pathnex Server
+- name: Install Nginx on Pathnex Server
   hosts: all
   become: yes
 
