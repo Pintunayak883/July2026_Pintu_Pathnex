@@ -1,0 +1,279 @@
+**************** Day 5 L1 ****************
+
+## Ansible - Handler to Restart Nginx
+
+---
+- name:Mange Nginx
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Update config file
+      copy:
+        src: index.html
+        dest: /usr/share/nginx/html/index.html
+      notify: Restart Nginx
+
+
+    handlers:
+       - name: Restart Nginx
+         service:
+            name: nginx
+            state:restarted
+
+## Terraform - EC2 with User Data (c6a.12xlarge)
+
+resource "aws_instance" "PathnexEC2" {
+    ami           = "ami-0abcd1234abcd1234"
+    instance_type = "c6a.12xlarge"
+
+    user_data = <<EOF
+   #!/bin/bash
+   yum install  -y httpd
+   systemctl start httpd
+   EOF
+
+      tags = {
+        Name = "Pathnex-EC2"
+      }
+}
+
+## Kubernetes - Resource Limits
+
+apiVersion: v1
+kind: Pod
+metadata:
+   name: pathnex-limited-pod
+  spec:
+    containers:
+       - name: app
+         image: nginx
+         resources:
+           limits:
+              memory: "256Mi"
+              cpu: "500m"
+
+
+## Jenkins Pipeline - Use Environment Variables
+You will learn how to **use environment variables in Jenkins pipelines**.
+
+pipeline {
+     agent any
+     environment {
+        INSTITUTE_NAME = "Pathnex"
+     }
+     stages {
+         stage('Print') {
+            steps {
+                sh 'echo "Welcome to $INSTITUTE_NAME DevOps Training"'
+            }
+         }
+         stage('Build') {
+            steps {
+                sh 'mvn clean package -Dinstitute.name=$INSTITUTE_NAME'
+            }
+         }
+     }
+}
+
+
+## GitLab CI - Use Environment Variables
+You will learn how to **use CI variables in GitLab pipelines**.
+
+stages:
+  - Build
+
+variables:
+  INSTITUTE_NAME: "Pathnex"
+
+build:
+  stage: build
+  image: maven:3.8.1-jdk-17
+  script:
+    - git clone https:github.com/Pathnex/sample-java-app.git
+    - cd sample-java-app
+    - echo "Welcome to $INSTITUTE_NAME DevOps Training"
+    - mvn clean package -Dinstitute.name=$INSTITUTE_NAME
+
+
+
+**************** Day 5 L2 ****************    
+
+## Jenkinsfile - With Git Integration and Testing
+
+``` groovy
+pipeline {
+     agent any
+     stages {
+        stage('Clone Repository') {
+            steps {
+                git 'https://github.com/Pahnex/sample-repo.git
+            }
+        }
+        stage('Build') {
+          steps {
+            echo 'Building project from Git repository'
+          }
+        }
+        stage('Test') {
+            steps {
+                echo 'Running unit tests'
+            }
+        }
+        stage('Deploy'){
+            steps {
+                echo 'Deploying application'
+            }
+        }
+     }
+}
+
+# GitLab CI/CD - With Docker Build
+stages:
+   - build
+   - push
+   - Deploy
+
+build:
+  stage: build
+  script:
+     - docker build -t pathnex-app .
+
+push:
+  stage: push
+  script:
+     - docker push pathnex-app
+
+deploy:
+   stage: push
+   script:
+      - docker push pathnex-app
+
+deploy:
+  stage: deploy
+  script:
+    - kubectl apply -f kubernetes/deployment.yaml
+
+
+# Ansible - Create User and Set Permissions
+- name: Create a new user
+  hosts: all
+  become: yes
+  tasks:
+    - name: Create user
+      user:
+        name: pathnex
+        state: present
+        shell: /bin/bash
+    - name: Set permissions for the user
+      file:
+        path: /home/pathnex
+        owner: pathnex
+        group: pathnex
+        mode: '0755'
+
+# Terraform - EC2 with Tags and Volume 
+resource "aws_instance" "PathnexEC2" {
+    ami            = "ami-0abcd1234abcd1234"
+    instance_type  = "t2.medium"
+
+    tags = {
+        Name = "Pathnex-server"
+    }
+
+    ebs_block_device {
+        device_name = "/dev/sdh"
+        volume_size = 50
+    }
+}
+
+# Docker
+# python application
+print("Hello Pathnex")
+
+# Docker file
+FROM python:3.11
+WORKDIR /opt/pathnex/python-app
+COPY app.py /opt/pathnex/python-app/
+CMD ["python", "/opt/pathnex/python-app/app.py"]
+
+# Real Path
+/opt/pathnex/python-app
+
+
+**************** Daily Scripts  ****************
+
+#!/bin/bash
+yum install -y git wget 
+
+#!/bin/bash
+useradd pathnex
+passwd pathnex
+
+#!/bin/bash
+mkdir -p /opt/pathnex
+
+#!/bin/bash
+tar -czvf backup.tar.gz /var/www/html
+
+#!/bin/bash
+systemctl restart nginx
+systemctl status nginx
+
+#!/bin/bash
+yum update -y
+
+#!/bin/bash
+cp index.html /var/www/html/
+
+#!/bin/bash
+echo "Current User: $(whoami)"
+echo "Hostname: $(hostname)"
+echo "Current Directory: $(pwd)"
+echo "Today's Date: $(date)"
+
+#!/bin/bash
+df -h
+
+#!/bin/bash
+free -h
+
+#!/bin/bash
+ps -ef
+
+#!/bin/bash
+systemctl status httpd
+
+#!/bin/bash
+mkdir project
+mkdir logs
+mkdir backup
+
+#!/bin/bash
+yum install -y docker
+systemctl start docker
+systemctl enable docker
+
+#!/bin/bash
+yum install -y docker
+systemctl start docker 
+systemctl enable docker
+
+docker pull nginx
+docker run -d -p 80:80 nginx
+
+#!/bin/bash
+useradd DevOps
+echo "Password@123" | passwd --stdin devops
+usermod -aG wheel devops
+
+#!/bin/bash
+yum install -y httpd
+systemctl start httpd
+systemctl enable httpd
+
+echo "<h1>Hello DevOps</h1> > /var/www/html/index.html
+
+#!/bin/bash
+yum install -y git
+git clone https://github.com/octocat/Hello-World.git
