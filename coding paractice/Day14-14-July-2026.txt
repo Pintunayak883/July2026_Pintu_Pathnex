@@ -134,23 +134,16 @@ spec:
 
 ---
 apiVersion: v1
-kind: service
-
+kind: Service
 metadata:
-   name: nginx-service
-
- spec:
-   selector:
-     app: nginx
-
-    ports:
-
+  name: nginx-service
+spec:
+  selector:
+    app: nginx
+  ports:
     - port: 80
-
-     targetPort: 80
-
-    type: NodePort
-
+      targetPort: 80
+  type: NodePort
 ## 4️⃣ Shell — Print CPU, Memory, Disk
 
 #!/bin/bash
