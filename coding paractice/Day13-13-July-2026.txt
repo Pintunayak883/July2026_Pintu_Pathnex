@@ -182,7 +182,7 @@ metadata:
                 secret:
                    secretName: nginx-secret
 
-# Jenkins - Multi-Brach Pipeline with Docker Build
+# Jenkins - Multi-Branch Pipeline with Docker Build
 pipeline {
      agent any
      stages {
