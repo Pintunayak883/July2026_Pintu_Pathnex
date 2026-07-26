@@ -2,7 +2,7 @@
 # What I did today
 
 # Taking a class in the early morning
-# Do day 13 crate PR task 
+# Do day 13 create PR task
 # write the code of L1 and L2 day 13 task list on the text file
 # try to understand code line by line of L1 or L2
 # do Practical of Docker
