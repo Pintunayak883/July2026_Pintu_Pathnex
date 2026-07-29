@@ -1,0 +1,121 @@
+**************** Day 28 L1 ****************
+
+Fix these intentionally broken files:
+
+## Ansible - broken
+
+- name: Install nginx
+  hosts: all
+  tasks: 
+     - name: Install Nginx
+       yum:
+         name: nginx
+         state: present
+
+## Terraform - Broken 
+
+resource "aws_s3_bucket" "BadBucket" {
+    bucket = "pathnex-bucket"
+    acl    = "public-read" 
+}
+
+## Kubernetes - Broken
+
+apiVersion: v1
+kind: Pod
+metadata:
+   name: brokenpod
+spec:
+  containers:
+    - name: app
+      image: nginx
+
+# Rollback Strategies
+
+## Jenkins Pipeline - Automatic Rollback
+You will learn how to **rollback automatically if deployment fails**.
+
+pipeline {
+    agent any
+    environment {
+        INSTITUTE_NAME = "Pathnex"
+        TEAM = "DevOps"
+        ENV = "prod"
+    }
+    stages {
+        stage('Deploy') {
+            steps {
+                script {
+                    try {
+                        sh 'echo "Deploying $INSTITUTE_NAME app in $ENV for $TEAM"'
+                        sh 'exit 1' // simulate failure
+                    } catch (Exception e) {
+                        echo "Deployment failed. Rolling back $INSTITUTE_NAME app in $ENV"
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+## GitLab CI - Rollback Strategy
+You will learn how to **simulate rollback in GitLab CI with tags**.
+
+stages:
+  - deploy
+
+variables:
+   INSTITUTE_NAME: "Patnex"
+   TEAM = "DevOps"
+   ENV  = "prod"
+
+deploy:
+  stage: deploy
+  image: alpine:latest
+  script: 
+    - echo "Deploying $INSTITUTE_NAME app in $ENV for $TEAM"
+    - echo 1
+after_script:
+  - echo "Deploying failed. Rolling back $INSTITUTE_NAME app in $ENV"
+
+**************** Day 28 L2 ****************
+
+## Ansible - Set Up VPC Peering Between AWS Accounts
+
+```yaml
+- name: Setup VPC Peering Between Accounts
+  hosts: localhost
+  tasks:
+    - name: Create VPC peering connection
+      command: aws ec2 create-vpc-peering-connection --vpc-id vpc-12345678 --peer-vpc-id vpc-87654321
+
+# Terraform "aws_vpc_peering_connection" pathnex_peering" {
+    vpc_id                    = aws_vpc.pathnex_rt.id
+    destination_cidr_block    = "10.0.0.0/16"
+    vpc_peering_connection_id = aws_vpc_peering_connection.pathnex_peering.id
+}
+
+# Kubernetes - Multi-Cluster VPC Peering and Network Policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: 
+   name: pathenx-vpc-policy
+spec:
+  podSelector:
+     matchLabels:
+        app: pathnex-app
+  ingress:
+     - form:
+         - podSelector:
+              matchLabels:
+                 app: pathenx-db
+
+# Docker 
+# Docker Save, Load & Backup
+docker save -o pathenx-nginx.tar pathnex-nginx
+
+docker load -i pathnex-nginx.tar
+
+# Bash
+docker run --rm -v -pathnex-volume:/data -v $(pwd):/backup ubuntu tar czf /backup pathnex-backup.tar.gz/data
