@@ -20,7 +20,7 @@ resource "aws_instance" "BadEC2" {
     instance_type = "c5.large"
     
     tags = {
-        Name: "Broken"
+        Name = "Broken"
     }
 }
 
