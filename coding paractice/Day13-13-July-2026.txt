@@ -147,7 +147,7 @@ metadata:
 apiVersion: v1
 kind: Secret
 metadata:
-   name: nginx-Secret
+   name: nginx-secret
   type: Opaque
   data:
     password: cGFoaG5leHBhc3M=
