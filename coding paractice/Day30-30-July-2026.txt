@@ -1,0 +1,227 @@
+**************** Day 30 L1 ****************
+
+# Ansible
+
+---
+- name: Crate Admin User
+  hosts: all
+  become: yes
+    
+    tasks:
+      - name: Create user
+        user:
+           name: pathnex-admin
+           shell: /bin/bash
+           state: present
+      
+      - name: Create .ssh directory
+        file:
+          path: /home/pathnex-admin/.ssh
+          state: directory
+          owner: pathnex-admin
+          group: pathnex-admin
+          mode: '0700'
+
+      - name: Add SSH public key
+        authorized_key:
+          user: pathnex-admin
+          state: present
+          key: "ssh-rsa AAAAB3NzaC1yc2EAAAAAAAAABAQpatnexkey"
+
+# Terraform
+
+provider "aws" {
+    region = "ap-south-1"
+}
+
+resource "aws_instance" "web" {
+    ami           = "ami-01234abcd1234abcd"
+    instance_type = "t2.micro"
+
+    tags = {
+        Name    = "Training-EC2"
+        Project = "Pathnex-Training"
+    }
+}
+
+# Kubernetes
+
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: nginx-Deployment
+
+spec:
+  replicas: 2
+
+  selector:
+     matchLabels:
+        app: nginx
+    
+  template:
+    metadata:
+       labels:
+         app: nginx
+        
+    spec:
+      containers:
+        - name: nginx
+          image: nginx
+          ports:
+            - containerPort: 80
+
+        
+---
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: nginx-Service
+
+spec:
+  selector:
+     app: nginx
+
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+
+    type: ClusterIP
+
+# Shell Script
+
+#!/bin/bash
+
+hostname -I
+
+df -h
+
+free -h 
+
+## Jenkins Pipeline
+You will learn to **automate all tasks in a Jenkins Pipeline** under real-world stages:
+
+pipeline {
+    agent any
+
+    environment {
+        INSTITUTE_NAME = "Pathnex"
+        TEAM           = "DevOps"
+        ENV            = "prod"
+        PROJECT        = "Pathnex-Training"
+    }
+
+    stages {
+         
+         stage('Infrastructure') {
+            steps {
+                echo "Creating AWS Infrastructure..."
+
+                sh '''
+                   terraform init
+
+                   terraform apply \
+                   -auto-approve
+                   -var="project=${PROJECT}"
+                   '''
+            }
+         }
+
+         stage('App Deployment') {
+            steps {
+                echo "Deploying Application..."
+
+                sh '''
+                ansible-playbook deploy.yml
+
+                kubectl apply -f deployment.yaml
+
+                kubectl apply -f service.yaml
+                '''
+            }
+         }
+
+         stage('Monitoring Checks') {
+            steps {
+                sh '''
+                   echo "==== Monitoring Menu ===="
+                   echo "1. IP"
+                   hostname -I
+
+                   echo ""
+
+                   echo "2. Disk"
+                   df -h
+
+                   echo ""
+
+                   echo "3. Memory"
+                   free -h
+                '''
+            }
+         }
+    }
+
+    post {
+
+        always {
+            echo "Pipeline Finished"
+        }
+
+        success {
+            echo "Deployment Successful"
+        }
+
+        failure {
+            echo "Deployment Failed"
+        }
+    }
+}
+
+
+## GitLab
+
+stages:
+   - infrastructure
+   - app_deployment
+   - monitoring_checks
+
+variables:
+   INSTITUTE_NAME: "Pathnex"
+   TEAM: "DevOps"
+   ENV: "prod"
+   PROJECT: "Pathenx-Training"
+
+infrastructure:
+   stage: infrastructure
+
+   script:
+     - echo "Creating Infrastructure..."
+     - cd terraform
+     - terraform init
+     - terraform apply -auto-approve -var="project=$PROJECT"
+
+app_deployment:
+   stage: app_deployment
+
+   script:
+     - echo "Deploying Application..."
+
+     - cd ansible
+     - ansible-playbook deploy.yml
+
+     - cd ../kubernetes
+     - kubectl apply -f deployment.yaml
+     - kubectl apply -f service.yaml
+
+monitoring_checks:
+    stage: monitoring_checks
+
+    script:
+     - hostname -I 
+     - df -h
+     - free -h
+
+     
