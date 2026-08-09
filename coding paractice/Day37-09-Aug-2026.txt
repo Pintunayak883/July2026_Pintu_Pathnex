@@ -1,5 +1,7 @@
 **************** Day 37 L1 ****************
 
+Revised for 9-Aug PR
+
 ---
 - name: Install Nginx
   hosts: all
@@ -8,39 +10,40 @@
   tasks:
     - name: Install Nginx
       ansible.builtin.package:
-         name: nginx
-         state: present
+        name: nginx
+        state: present
 
     - name: Start nginx
       ansible.builtin.service:
-         name: nginx
-         state: started
-         enabled: yes
+        name: nginx
+        state: started
+        enabled: yes
 
 
 # Terraform
 
 terraform {
-    required_providers {
-        aws = {
-            source  = "hashicorp/aws"
-            version = "~> 6.0"
-        }
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 6.0"
     }
+  }
 }
 
 provider "aws" {
-    region = "ap-south-1"
+  region = "ap-south-1"
 }
 
 resource "aws_instance" "pathnex" {
-    ami           = "ami-0f58b397bc5c1f2e8"
-    instance_type = "t3.micro"
+  ami           = "ami-0f58b397bc5c1f2e8"
+  instance_type = "t3.micro"
 
-    tags = {
-        Name = "Pathnex-Server"
-    }
+  tags = {
+    Name = "Pathnex-Server"
+  }
 }
+
 
 # Kubernetes
 
@@ -48,26 +51,23 @@ apiVersion: apps/v1
 kind: Deployment
 
 metadata:
-   name: pathnex-deployment
+  name: pathnex-deployment
 
 spec:
   replicas: 2
-
   selector:
-     matchLabels:
+    matchLabels:
+      app: pathnex
+  template:
+    metadata:
+      labels:
         app: pathnex
-
-     template:
-        metedata:
-          labels:
-            app: pathnex
-
-        spec:
-          containers:
-             - name: pathnex
-               image: nginx:latest
-               ports:
-                 - containerPort: 80
+    spec:
+      containers:
+        - name: pathnex
+          image: nginx:latest
+          ports:
+            - containerPort: 80
 
 
 # Shell script
@@ -75,7 +75,6 @@ spec:
 #!/bin/bash
 
 date
-
 uptime
 
 
@@ -85,25 +84,25 @@ uptime
 You will learn how to **create parameterized builds in Jenkins**.
 
 pipeline {
-    agent any
-    parameters {
-        string(name: 'ENVIRONMENT', defaultValue:'dev', description:'Deployment Environment')
+  agent any
+  parameters {
+    string(name: 'ENVIRONMENT', defaultValue: 'dev', description: 'Deployment Environment')
+  }
+  environment {
+    INSTITUTE_NAME = "Pathnex"
+  }
+  stages {
+    stage('Checkout') {
+      steps {
+        git url: 'https://github.com/Pathnex/simple-java-app.git'
+      }
     }
-    environment {
-        INSTITUTE_NAME = "Pathnex"
+    stage('Deploy') {
+      steps {
+        sh 'echo "Deploying to $ENVIRONMENT by $INSTITUTE_NAME"'
+      }
     }
-    stages {
-        stage('Checkout') {
-            steps {
-                git url: 'https://github.com/Pathnex/smple-java-app.git'
-            }
-        }
-        stage('Deploy') {
-            steps {
-                sh 'echo "Deploying to $ENVIRONMENT by $INSTITUTE_NAME"'
-            }
-        }
-    }
+  }
 }
 
 ## GitLab CI - Parameterized via Variables
@@ -113,55 +112,59 @@ stages:
   - deploy
 
 variables:
-    INSTITUTE_NAME: "Pathnex"
-    ENVIRONMENT: "dev"
+  INSTITUTE_NAME: "Pathnex"
+  ENVIRONMENT: "dev"
 
 deploy:
-   stage: deploy
-   image: alpine:latest
-   script:
-     - echo "Deploying to $ENVIRONMENT by $INSTITUTE_NAME"
+  stage: deploy
+  image: alpine:latest
+  script:
+    - echo "Deploying to $ENVIRONMENT by $INSTITUTE_NAME"
 
 
 **************** Day 37 L2 ****************
 
 # Ansible - Setup Nginx with Custom Config
+---
 - name: Setup Nginx with Custom Config
   hosts: all
   become: yes
+
   tasks:
     - name: Install nginx
       yum:
         name: nginx
         state: present
-    
+
     - name: Copy custom nginx.conf
       copy:
         src: nginx.conf
         dest: /etc/nginx/nginx.conf
-    
+
     - name: Start nginx service
       service:
-         name: nginx
-         state: started
-         enabled: yes
+        name: nginx
+        state: started
+        enabled: yes
+
 
 ## Terraform - Provision EC2 with IAM Role
 
 resource "aws_iam_role" "ec2_role" {
-    name               = "patnhnex_ec2_role"
-    assume_role_policy = jsonencode({
-        Version    = "2012-10-17"
-        Statement  = [
-            {
-                Action    = "sts:AssumeRole"
-                Effect    = "Allow"
-                Principal = {
-                 Service  = "ec2.amazonaws.com"
-                }
-            }
-        ]
-    })
+  name = "pathnex_ec2_role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      }
+    ]
+  })
 }
 
 
@@ -170,35 +173,37 @@ resource "aws_iam_role" "ec2_role" {
 apiVersion: v1
 kind: ConfigMap
 metadata:
-    name: pathnex-config
-  data:
-    app.properties: |
-       key=value
+  name: pathnex-config
+data:
+  app.properties: |
+    key=value
 
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-    name: pathnex-secret
+  name: pathnex-secret
 type: Opaque
 data:
-  password: cGF051eHBhc3M=
+  password: cGF0aG5leHBhc3M=
+
 
 # Shell Script - Archive Logs
-!/bin/bash
+#!/bin/bash
 tar -czf /var/log/archived_logs.tar.gz /var/log/*.log
 
+
 # Docker Java Application
-# Java
 class Hello {
-    public static void main(String[] args) {
-        System.out.println("Hello Pathnex");
-    }
+  public static void main(String[] args) {
+    System.out.println("Hello Pathnex");
+  }
 }
 
+
 # Docker File
-FORM openjdk:17
+FROM openjdk:17
 WORKDIR /opt/pathnex/java-app
-COPY hello.java /opt/pathnex/java-app/
+COPY Hello.java /opt/pathnex/java-app/
 RUN javac /opt/pathnex/java-app/Hello.java
 CMD ["java", "-cp", "/opt/pathnex/java-app", "Hello"]
