@@ -6,6 +6,7 @@
 - name: Create config file for Pathnex
   hosts: all
   become: yes
+  
 
   tasks:
     - name: Write content to file
